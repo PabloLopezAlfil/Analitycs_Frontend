@@ -8,6 +8,7 @@ import type { IconType } from "react-icons";
 import TableAnalysis from "./shared/componets/TableAnalysis";
 import QuickUpload from "./shared/componets/QuickUpload";
 import ReviewQueue from "./shared/componets/ReviewQueue";
+import FrequentErrors from "./shared/componets/FrequentErrors";
 
 interface Metric {
   icon: IconType;
@@ -118,6 +119,10 @@ export default function Home() {
           <QuickUpload />
           <ReviewQueue />
         </aside>
+      </section>
+
+      <section className="px-8 pb-8">
+        <FrequentErrors />
       </section>
     </>
   );

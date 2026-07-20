@@ -10,6 +10,8 @@ import ProtectedRoute from "./modules/shared/routes/ProtectedRoute";
 import Layout from "./modules/shared/Layaout/Layout";
 import Home from "./modules/Home";
 import Placeholder from "./modules/shared/Placeholder";
+import Uploads from "./modules/Uploads/Pages/Uploads";
+import UploadDetail from "./modules/Uploads/Pages/UploadDetail";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -29,10 +31,13 @@ createRoot(rootElement).render(
               <Route
                 path="/uploads"
                 element={
-                  <Placeholder
-                    title="Subidas"
-                    description="Subida y gestión de emails (HTML, ZIP simple y ZIP por lotes). Disponible en la Fase 2."
-                  />
+                  <Uploads/>
+                }
+              />
+              <Route
+                path="/uploads/:id"
+                element={
+                  <UploadDetail/>
                 }
               />
               <Route
