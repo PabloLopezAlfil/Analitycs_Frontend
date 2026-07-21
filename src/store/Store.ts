@@ -3,6 +3,7 @@ import authReducer from "../modules/Login/Features/AuthSlice";
 import uploadsReducer from "../modules/Uploads/Features/UploadsSlice";
 import htmlDocumentsReducer from "../modules/Uploads/Features/HtmlDocumentsSlice";
 import imagesReducer from "../modules/Uploads/Features/ImagesSlice";
+import analysisReducer from "../modules/Analysis/Features/AnalysisSlice";
 
 const Store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const Store = configureStore({
     uploads: uploadsReducer,
     htmlDocuments: htmlDocumentsReducer,
     images: imagesReducer,
+    analysis: analysisReducer,
   },
 });
 

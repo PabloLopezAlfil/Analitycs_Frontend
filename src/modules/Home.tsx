@@ -1,14 +1,46 @@
-import { useAppSelector } from "../store/hooks";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { selectCurrentUser } from "./Login/Features/AuthSlice";
 import { AiOutlineMail } from "react-icons/ai";
 import { GiRadarSweep } from "react-icons/gi";
 import { MdErrorOutline } from "react-icons/md";
 import { IoStarOutline } from "react-icons/io5";
 import type { IconType } from "react-icons";
-import TableAnalysis from "./shared/componets/TableAnalysis";
-import QuickUpload from "./shared/componets/QuickUpload";
-import ReviewQueue from "./shared/componets/ReviewQueue";
-import FrequentErrors from "./shared/componets/FrequentErrors";
+import TableAnalysis, {
+  type AnalysisTableRow,
+} from "./shared/components/TableAnalysis";
+import QuickUpload from "./shared/components/QuickUpload";
+import ReviewQueue from "./shared/components/ReviewQueue";
+import FrequentErrors from "./shared/components/FrequentErrors";
+import { fetchAnalyses } from "./Analysis/Features/AnalysisThunk";
+import {
+  selectAnalyses,
+  selectAnalysisError,
+  selectAnalysisListStatus,
+} from "./Analysis/Features/AnalysisSlice";
+import type { Analysis as AnalysisModel } from "./Analysis/Interface/AnalysisInterface";
+
+type AnalysisTone = AnalysisTableRow["tone"];
+
+function statusForScore(score: number | null): {
+  label: string;
+  tone: AnalysisTone;
+} {
+  if (score === null) return { label: "Sin puntuar", tone: "neutral" };
+  if (score >= 90) return { label: "Cumplimiento alto", tone: "success" };
+  if (score >= 70) return { label: "Requiere mejoras", tone: "warning" };
+  return { label: "Accesibilidad deficiente", tone: "danger" };
+}
+
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleString("es-ES", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 interface Metric {
   icon: IconType;
@@ -64,6 +96,35 @@ const metrics: Metric[] = [
 
 export default function Home() {
   const user = useAppSelector(selectCurrentUser);
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const analyses = useAppSelector(selectAnalyses);
+  const status = useAppSelector(selectAnalysisListStatus);
+  const error = useAppSelector(selectAnalysisError);
+
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fetchAnalyses());
+    }
+  }, [status, dispatch]);
+
+  const rows: AnalysisTableRow[] = [...analyses]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 5)
+    .map(({ id, htmlId, score, createdAt }: AnalysisModel) => {
+      const { label, tone } = statusForScore(score);
+      return {
+        id,
+        file: `Documento #${htmlId}`,
+        statusLabel: label,
+        tone,
+        score,
+        date: formatDate(createdAt),
+      };
+    });
 
   return (
     <>
@@ -113,7 +174,22 @@ export default function Home() {
 
       <section className="grid grid-cols-3 gap-4 px-8 pb-8">
         <div className="col-span-2 ">
-          <TableAnalysis />
+          <TableAnalysis
+            title="Últimos análisis"
+            subtitle="Resultados recientes del equipo"
+            rows={rows}
+            showAction
+            onAction={() => navigate("/analysis")}
+            loading={status === "pending"}
+            error={status === "rejected" ? error : null}
+            emptyMessage="Aún no hay análisis para mostrar."
+            totalLabel={
+              status === "fulfilled"
+                ? `${rows.length} de ${analyses.length}`
+                : undefined
+            }
+            documentHeader="ARCHIVO"
+          />
         </div>
         <aside className="col-span-1 space-y-4">
           <QuickUpload />

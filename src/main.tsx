@@ -12,7 +12,7 @@ import Home from "./modules/Home";
 import Placeholder from "./modules/shared/Placeholder";
 import Uploads from "./modules/Uploads/Pages/Uploads";
 import UploadDetail from "./modules/Uploads/Pages/UploadDetail";
-
+import Analysis from "./modules/Analysis/Pages/Analysis";
 const rootElement = document.getElementById("root");
 if (!rootElement) {
   throw new Error("No se encontró el elemento #root en el HTML.");
@@ -28,27 +28,9 @@ createRoot(rootElement).render(
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<Home />} />
-              <Route
-                path="/uploads"
-                element={
-                  <Uploads/>
-                }
-              />
-              <Route
-                path="/uploads/:id"
-                element={
-                  <UploadDetail/>
-                }
-              />
-              <Route
-                path="/analysis"
-                element={
-                  <Placeholder
-                    title="Análisis"
-                    description="Lanzamiento y resultados de los análisis de accesibilidad. Disponible en la Fase 3."
-                  />
-                }
-              />
+              <Route path="/uploads" element={<Uploads />} />
+              <Route path="/uploads/:id" element={<UploadDetail />} />
+              <Route path="/analysis" element={<Analysis />} />
               <Route
                 path="/history"
                 element={

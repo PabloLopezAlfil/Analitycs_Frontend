@@ -1,21 +1,44 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { IconType } from "react-icons";
-import { FiEye, FiFileText, FiFolder, FiLayers, FiZap } from "react-icons/fi";
+import {
+  FiAlertCircle,
+  FiCheck,
+  FiEye,
+  FiFileText,
+  FiFolder,
+  FiLayers,
+  FiLoader,
+  FiZap,
+} from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { runAnalysis } from "../../Analysis/Features/AnalysisThunk";
 import {
   selectUploads,
   selectUploadsError,
   selectUploadsListStatus,
 } from "../Features/UploadsSlice";
-import { fetchUploads } from "../Features/UploadsThunk";
+import { fetchUploadById, fetchUploads } from "../Features/UploadsThunk";
 import type { UploadType } from "../Interface/UploadsInterface";
+
+// Estado del análisis por fila (una subida a la vez).
+type AnalyzeState = "analyzing" | "done" | "error";
 
 // Icono y etiqueta por tipo de subida.
 const TYPE_META: Record<UploadType, { label: string; icon: IconType }> = {
   HTML: { label: "HTML", icon: FiFileText },
   ZIP_SINGLE: { label: "ZIP simple", icon: FiFolder },
   ZIP_MULTIPLE: { label: "ZIP por lotes", icon: FiLayers },
+};
+
+const ANALYZE_META: Record<
+  "idle" | AnalyzeState,
+  { icon: IconType; label: string }
+> = {
+  idle: { icon: FiZap, label: "Realizar análisis" },
+  analyzing: { icon: FiLoader, label: "Analizando…" },
+  done: { icon: FiCheck, label: "Analizado" },
+  error: { icon: FiAlertCircle, label: "Reintentar" },
 };
 
 const thClass = "border-y border-line-soft py-2 font-medium";
@@ -37,9 +60,29 @@ export default function Uploads() {
   const status = useAppSelector(selectUploadsListStatus);
   const error = useAppSelector(selectUploadsError);
 
+  const [analyzeState, setAnalyzeState] = useState<
+    Record<number, AnalyzeState>
+  >({});
+
   useEffect(() => {
     dispatch(fetchUploads());
   }, [dispatch]);
+
+  async function handleAnalyze(uploadId: number) {
+    setAnalyzeState((prev) => ({ ...prev, [uploadId]: "analyzing" }));
+    try {
+      const detail = await dispatch(fetchUploadById(uploadId)).unwrap();
+      if (detail.htmlDocuments.length === 0) {
+        throw new Error("La subida no contiene documentos analizables");
+      }
+      for (const doc of detail.htmlDocuments) {
+        await dispatch(runAnalysis(doc.id)).unwrap();
+      }
+      setAnalyzeState((prev) => ({ ...prev, [uploadId]: "done" }));
+    } catch {
+      setAnalyzeState((prev) => ({ ...prev, [uploadId]: "error" }));
+    }
+  }
 
   return (
     <div className="p-8">
@@ -47,7 +90,7 @@ export default function Uploads() {
         type="button"
         className="flex h-10 shrink-0 mb-3 items-center gap-1.5 rounded-button bg-brand-500 px-4 text-sm font-semibold text-brand-900 transition-colors hover:bg-brand-700 hover:text-white"
       >
-       Volver
+        Volver
       </button>
 
       <div className="rounded-card border border-line-soft bg-surface shadow-card">
@@ -164,13 +207,26 @@ export default function Uploads() {
                           <FiEye className="h-3.5 w-3.5" aria-hidden="true" />
                           Ver detalle
                         </button>
-                        <button
-                          type="button"
-                          className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-button bg-brand-500 px-3 py-1.5 text-caption font-semibold text-brand-900 transition-colors hover:bg-brand-700 hover:text-white"
-                        >
-                          <FiZap className="h-3.5 w-3.5" aria-hidden="true" />
-                          Realizar análisis
-                        </button>
+                        {(() => {
+                          const state = analyzeState[id];
+                          const analyzing = state === "analyzing";
+                          const { icon: ActionIcon, label } =
+                            ANALYZE_META[state ?? "idle"];
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => handleAnalyze(id)}
+                              disabled={analyzing}
+                              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-button bg-brand-500 px-3 py-1.5 text-caption font-semibold text-brand-900 transition-colors hover:bg-brand-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              <ActionIcon
+                                className={`h-3.5 w-3.5 ${analyzing ? "animate-spin" : ""}`}
+                                aria-hidden="true"
+                              />
+                              {label}
+                            </button>
+                          );
+                        })()}
                       </div>
                     </td>
                   </tr>
