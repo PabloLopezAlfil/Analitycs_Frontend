@@ -28,7 +28,6 @@ export async function apiFetch<T>(
 
   const response = await fetch(`${API_URL}${path}`, { ...options, headers });
 
-  // Token ausente/caducado: limpiamos la sesión local (el guard redirige).
   if (response.status === 401) {
     clearAuth();
   }

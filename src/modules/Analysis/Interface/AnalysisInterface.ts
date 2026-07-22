@@ -19,8 +19,13 @@ export type CheckCategory =
 
 export interface AnalysisFinding {
   id: number;
-  location: string; 
-  evidence: string; 
+  location: string;
+  evidence: string;
+  // Veredicto de la revisión por IA (docs backend 0005 §7)
+  aiStatus: "VALIDADO_IA" | "INCUMPLE" | "REVISION_PENDIENTE" | null;
+  aiConfidence: "alta" | "media" | "baja" | null;
+  aiProblem: string | null;
+  aiRecommendation: string | null;
 }
 
 export interface AnalysisCheck {

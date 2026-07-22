@@ -7,12 +7,13 @@ import type {
   AnalysisDetail,
   CheckCategory,
 } from "../Interface/AnalysisInterface";
-import { fetchAnalyses, fetchAnalysisById, runAnalysis } from "./AnalysisThunk";
+import { fetchAnalyses, fetchAnalysisById, runAnalysis, reviewAnalysisWithAi } from "./AnalysisThunk";
 
 interface AnalysisState {
   items: Analysis[]; // histórico/listado (GET /analysis)
   current: AnalysisDetail | null; // análisis abierto
-  runStatus: RequestStatus; // análisis en curso (POST /analysis)
+  runStatus: RequestStatus; // análisis en curso 
+  runIAStatus: RequestStatus; // revisión por IA en curso 
   listStatus: RequestStatus; // carga del listado
   detailStatus: RequestStatus; // carga del detalle
   error?: string;
@@ -22,6 +23,7 @@ const initialState: AnalysisState = {
   items: [],
   current: null,
   runStatus: "idle",
+  runIAStatus: "idle",
   listStatus: "idle",
   detailStatus: "idle",
   error: undefined,
@@ -37,8 +39,7 @@ const analysisSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Lanzar análisis: al completar, deja el resultado como current y lo
-      // añade al principio del histórico para que aparezca sin recargar.
+      
       .addCase(runAnalysis.pending, (state) => {
         state.runStatus = "pending";
         state.error = undefined;
@@ -52,7 +53,6 @@ const analysisSlice = createSlice({
         state.runStatus = "rejected";
         state.error = action.payload ?? action.error.message;
       })
-      // Listado
       .addCase(fetchAnalyses.pending, (state) => {
         state.listStatus = "pending";
         state.error = undefined;
@@ -65,7 +65,6 @@ const analysisSlice = createSlice({
         state.listStatus = "rejected";
         state.error = action.payload ?? action.error.message;
       })
-      // Detalle
       .addCase(fetchAnalysisById.pending, (state) => {
         state.detailStatus = "pending";
         state.error = undefined;
@@ -77,16 +76,31 @@ const analysisSlice = createSlice({
       .addCase(fetchAnalysisById.rejected, (state, action) => {
         state.detailStatus = "rejected";
         state.error = action.payload ?? action.error.message;
-      });
+      })
+     
+      .addCase(reviewAnalysisWithAi.pending, (state) => {
+        state.runIAStatus = "pending";
+        state.error = undefined;
+      })
+      .addCase(reviewAnalysisWithAi.fulfilled, (state, action) => {
+        state.runIAStatus = "fulfilled";
+        state.current = action.payload;
+      })
+      .addCase(reviewAnalysisWithAi.rejected, (state, action) => {
+        state.runIAStatus = "rejected";
+        state.error = action.payload ?? action.error.message;
+      })
+
   },
 });
 
 export const { clearError } = analysisSlice.actions;
 
-// Selectores base
+
 export const selectAnalyses = (state: RootState) => state.analysis.items;
 export const selectCurrentAnalysis = (state: RootState) => state.analysis.current;
 export const selectAnalysisRunStatus = (state: RootState) => state.analysis.runStatus;
+export const selectAnalysisRunIAStatus = (state: RootState) => state.analysis.runIAStatus;
 export const selectAnalysisListStatus = (state: RootState) => state.analysis.listStatus;
 export const selectAnalysisDetailStatus = (state: RootState) => state.analysis.detailStatus;
 export const selectAnalysisError = (state: RootState) => state.analysis.error;

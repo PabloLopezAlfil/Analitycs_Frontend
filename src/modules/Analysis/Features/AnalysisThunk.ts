@@ -7,9 +7,7 @@ function toMessage(error: unknown, fallback: string): string {
   return (error as { message?: string })?.message ?? fallback;
 }
 
-// POST /analysis — lanza el análisis de un documento HTML. El backend evalúa
-// los criterios de accesibilidad y devuelve el resultado completo (score +
-// checks + findings). Es la acción principal de la fase.
+
 export const runAnalysis = createAsyncThunk<
   AnalysisDetail,
   number,
@@ -25,8 +23,7 @@ export const runAnalysis = createAsyncThunk<
   }
 });
 
-// GET /analysis[?html_id=:id] — listado (histórico) de análisis. Acepta un
-// htmlId opcional para filtrar por documento.
+
 export const fetchAnalyses = createAsyncThunk<
   Analysis[],
   number | void,
@@ -40,8 +37,6 @@ export const fetchAnalyses = createAsyncThunk<
   }
 });
 
-// GET /analysis/:id — detalle de un análisis concreto (para reabrir un
-// resultado del histórico).
 export const fetchAnalysisById = createAsyncThunk<
   AnalysisDetail,
   number,
@@ -51,5 +46,19 @@ export const fetchAnalysisById = createAsyncThunk<
     return await apiFetch<AnalysisDetail>(`/analysis/${id}`);
   } catch (error) {
     return rejectWithValue(toMessage(error, "No se pudo cargar el análisis"));
+  }
+});
+
+export const reviewAnalysisWithAi = createAsyncThunk<
+  AnalysisDetail,
+  number,
+  { rejectValue: string }
+>("analysis/reviewWithAi", async (id, { rejectWithValue }) => {
+  try {
+    return await apiFetch<AnalysisDetail>(`/analysis/${id}/ai`, {
+      method: "POST",
+    });
+  } catch (error) {
+    return rejectWithValue(toMessage(error, "No se pudo revisar el análisis con IA"));
   }
 });
