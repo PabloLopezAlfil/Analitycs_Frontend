@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import {
   selectAnalyses,
@@ -20,8 +21,6 @@ function statusForScore(score: number | null): {
   return { label: "Accesibilidad deficiente", tone: "danger" };
 }
 
-const thClass = "border-y border-line-soft py-2 font-medium";
-const tdClass = "py-3 align-middle";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString("es-ES", {
@@ -34,6 +33,7 @@ function formatDate(iso: string): string {
 
 export default function Analysis() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const analyses = useAppSelector(selectAnalyses);
   const status = useAppSelector(selectAnalysisListStatus);
   const error = useAppSelector(selectAnalysisError);
@@ -62,6 +62,7 @@ export default function Analysis() {
         title="Análisis realizados"
         subtitle="Histórico de análisis de accesibilidad"
         rows={rows}
+        onViewDetail={(id) => navigate(`/analysis/${id}`)}
         loading={status === "idle" || status === "pending"}
         error={status === "rejected" ? error : null}
         emptyMessage="Aún no hay análisis. Lanza uno desde la sección de subidas."

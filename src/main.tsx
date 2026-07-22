@@ -13,6 +13,7 @@ import Placeholder from "./modules/shared/Placeholder";
 import Uploads from "./modules/Uploads/Pages/Uploads";
 import UploadDetail from "./modules/Uploads/Pages/UploadDetail";
 import Analysis from "./modules/Analysis/Pages/Analysis";
+import AnalysisDetail from "./modules/Analysis/Pages/AnalysisDetail";
 const rootElement = document.getElementById("root");
 if (!rootElement) {
   throw new Error("No se encontró el elemento #root en el HTML.");
@@ -31,6 +32,7 @@ createRoot(rootElement).render(
               <Route path="/uploads" element={<Uploads />} />
               <Route path="/uploads/:id" element={<UploadDetail />} />
               <Route path="/analysis" element={<Analysis />} />
+              <Route path="/analysis/:id" element={<AnalysisDetail />}/>
               <Route
                 path="/history"
                 element={

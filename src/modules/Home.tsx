@@ -178,6 +178,7 @@ export default function Home() {
             title="Últimos análisis"
             subtitle="Resultados recientes del equipo"
             rows={rows}
+            onViewDetail={(id) => navigate(`/analysis/${id}`)}
             showAction
             onAction={() => navigate("/analysis")}
             loading={status === "pending"}

@@ -29,7 +29,7 @@ export default function MenuSide() {
   }
 
   return (
-    <aside className="flex h-dvh w-[272px] shrink-0 flex-col border-r border-line bg-surface-soft px-4 py-5 text-ink">
+    <aside className="flex h-dvh w-[272px] shrink-0 flex-col overflow-y-auto border-r border-line bg-surface-soft px-4 py-5 text-ink">
       <div className="flex items-center gap-3 border-b border-line px-2 pb-5">
         <div className="grid h-10 w-10 shrink-0 place-items-center rounded-button bg-brand-500 text-sm font-bold text-brand-900 shadow-sm">
           {initials}

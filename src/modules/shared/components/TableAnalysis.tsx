@@ -1,5 +1,5 @@
 import type { IconType } from "react-icons";
-import { FiArrowRight, FiFileText } from "react-icons/fi";
+import { FiArrowRight, FiEye, FiFileText } from "react-icons/fi";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
@@ -31,6 +31,7 @@ interface TableAnalysisProps {
   showAction?: boolean;
   actionLabel?: string;
   onAction?: () => void;
+  onViewDetail?: (id: AnalysisTableRow["id"]) => void;
   showIncidents?: boolean;
   footerInfo?: string;
   totalLabel?: string;
@@ -77,6 +78,7 @@ export default function TableAnalysis({
   showAction = false,
   actionLabel = "Ver histórico",
   onAction,
+  onViewDetail,
   showIncidents = false,
   footerInfo,
   totalLabel,
@@ -90,7 +92,8 @@ export default function TableAnalysis({
   }[scoreAlign];
 
   const hasRows = rows.length > 0;
-  const emptyCellColSpan = showIncidents ? 5 : 4;
+  const hasDetailAction = onViewDetail !== undefined;
+  const emptyCellColSpan = (showIncidents ? 5 : 4) + (hasDetailAction ? 1 : 0);
 
   const renderMessage = (
     message: string,
@@ -145,6 +148,9 @@ export default function TableAnalysis({
               <th className={`${thClass} whitespace-nowrap`}>INCIDENCIAS</th>
             ) : null}
             <th className={`${thClass} whitespace-nowrap px-5 text-right`}>FECHA</th>
+            {hasDetailAction ? (
+              <th className={`${thClass} whitespace-nowrap px-5 text-right`} />
+            ) : null}
           </tr>
         </thead>
         <tbody className="divide-y divide-line-soft">
@@ -256,6 +262,19 @@ export default function TableAnalysis({
                           >
                             {date}
                           </td>
+
+                          {hasDetailAction ? (
+                            <td className={`${tdClass} px-5 text-right`}>
+                              <button
+                                type="button"
+                                onClick={() => onViewDetail(id)}
+                                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-button border border-line bg-surface px-3 py-1.5 text-caption font-semibold text-muted transition-colors hover:border-line-strong hover:text-ink"
+                              >
+                                <FiEye className="h-3.5 w-3.5" aria-hidden="true" />
+                                Ver detalle
+                              </button>
+                            </td>
+                          ) : null}
                         </tr>
                       );
                     },
