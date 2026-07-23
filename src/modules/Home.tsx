@@ -19,6 +19,8 @@ import {
   selectAnalysisError,
   selectAnalysisListStatus,
 } from "./Analysis/Features/AnalysisSlice";
+import { selectHtmlDocumentNames } from "./Uploads/Features/HtmlDocumentsSlice";
+import { fetchHtmlDocuments } from "./Uploads/Features/HtmlDocumentsThunk";
 import type { Analysis as AnalysisModel } from "./Analysis/Interface/AnalysisInterface";
 
 type AnalysisTone = AnalysisTableRow["tone"];
@@ -101,12 +103,17 @@ export default function Home() {
   const analyses = useAppSelector(selectAnalyses);
   const status = useAppSelector(selectAnalysisListStatus);
   const error = useAppSelector(selectAnalysisError);
+  const documentNames = useAppSelector(selectHtmlDocumentNames);
 
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchAnalyses());
     }
   }, [status, dispatch]);
+
+  useEffect(() => {
+    dispatch(fetchHtmlDocuments());
+  }, [dispatch]);
 
   const rows: AnalysisTableRow[] = [...analyses]
     .sort(
@@ -118,7 +125,7 @@ export default function Home() {
       const { label, tone } = statusForScore(score);
       return {
         id,
-        file: `Documento #${htmlId}`,
+        file: documentNames[htmlId] ?? `Documento #${htmlId}`,
         statusLabel: label,
         tone,
         score,
@@ -179,6 +186,7 @@ export default function Home() {
             subtitle="Resultados recientes del equipo"
             rows={rows}
             onViewDetail={(id) => navigate(`/analysis/${id}`)}
+            onPdf={(id) => navigate(`/analysis/${id}/pdf`)}
             showAction
             onAction={() => navigate("/analysis")}
             loading={status === "pending"}

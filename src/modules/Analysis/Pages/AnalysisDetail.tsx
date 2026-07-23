@@ -18,6 +18,8 @@ import {
   selectCurrentAnalysis,
 } from "../Features/AnalysisSlice";
 import { fetchAnalysisById, reviewAnalysisWithAi } from "../Features/AnalysisThunk";
+import { selectHtmlDocumentNames } from "../../Uploads/Features/HtmlDocumentsSlice";
+import { fetchHtmlDocuments } from "../../Uploads/Features/HtmlDocumentsThunk";
 import type {
   AnalysisCheck,
   CheckCategory,
@@ -247,6 +249,7 @@ export default function AnalysisDetail() {
   const status = useAppSelector(selectAnalysisDetailStatus);
   const runIAStatus = useAppSelector(selectAnalysisRunIAStatus);
   const error = useAppSelector(selectAnalysisError);
+  const documentNames = useAppSelector(selectHtmlDocumentNames);
   const [selectedCategory, setSelectedCategory] =
     useState<CategoryFilter>("ALL");
 
@@ -264,6 +267,10 @@ export default function AnalysisDetail() {
       dispatch(fetchAnalysisById(numericId));
     }
   }, [dispatch, id, numericId]);
+
+  useEffect(() => {
+    dispatch(fetchHtmlDocuments());
+  }, [dispatch]);
 
   useEffect(() => {
     setSelectedCategory("ALL");
@@ -325,7 +332,9 @@ export default function AnalysisDetail() {
                 <div className="min-w-0">
                   <h1 className="text-h1 text-ink">Análisis #{analysis.id}</h1>
                   <div className="mt-1.5 flex flex-wrap items-center gap-2 text-micro text-subtle">
-                    <span>Documento #{analysis.htmlId}</span>
+                    <span>
+                      {documentNames[analysis.htmlId] ?? `Documento #${analysis.htmlId}`}
+                    </span>
                     <span>·</span>
                     <span>{formatDate(analysis.createdAt)}</span>
                     <span>·</span>

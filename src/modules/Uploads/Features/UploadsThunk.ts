@@ -2,15 +2,11 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { apiFetch } from "../../shared/api/apiClient";
 import type { Upload, UploadDetail } from "../Interface/UploadsInterface";
 
-// Extrae un mensaje legible del error del cliente HTTP (ver apiClient).
 function toMessage(error: unknown, fallback: string): string {
   return (error as { message?: string })?.message ?? fallback;
 }
 
-// POST /uploads — sube un archivo (HTML o ZIP) como multipart/form-data. El
-// backend detecta el tipo, procesa y persiste; devuelve la subida creada con
-// sus documentos e imágenes ya procesados. El apiClient no fija Content-Type
-// para FormData (deja que el navegador ponga el boundary).
+
 export const uploadFile = createAsyncThunk<
   UploadDetail,
   File,
@@ -28,7 +24,6 @@ export const uploadFile = createAsyncThunk<
   }
 });
 
-// GET /uploads — listado resumido de subidas.
 export const fetchUploads = createAsyncThunk<
   Upload[],
   void,
@@ -41,7 +36,6 @@ export const fetchUploads = createAsyncThunk<
   }
 });
 
-// GET /uploads/:id — detalle de una subida (con sus documentos e imágenes).
 export const fetchUploadById = createAsyncThunk<
   UploadDetail,
   number,
@@ -53,3 +47,18 @@ export const fetchUploadById = createAsyncThunk<
     return rejectWithValue(toMessage(error, "No se pudo cargar la subida"));
   }
 });
+
+
+export const deleteUpload = createAsyncThunk<
+  number,
+  number,
+  { rejectValue: string }
+>("uploads/deleteUpload", async (id, { rejectWithValue }) => {
+  try {
+    await apiFetch<void>(`/uploads/${id}`, { method: "DELETE" });
+    return id;
+  } catch (error) {
+    return rejectWithValue(toMessage(error, "No se pudo eliminar la subida"));
+  }
+});
+

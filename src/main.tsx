@@ -14,6 +14,8 @@ import Uploads from "./modules/Uploads/Pages/Uploads";
 import UploadDetail from "./modules/Uploads/Pages/UploadDetail";
 import Analysis from "./modules/Analysis/Pages/Analysis";
 import AnalysisDetail from "./modules/Analysis/Pages/AnalysisDetail";
+import ConfigPDF from "./modules/PDF/config/configPDF";
+
 const rootElement = document.getElementById("root");
 if (!rootElement) {
   throw new Error("No se encontró el elemento #root en el HTML.");
@@ -33,6 +35,7 @@ createRoot(rootElement).render(
               <Route path="/uploads/:id" element={<UploadDetail />} />
               <Route path="/analysis" element={<Analysis />} />
               <Route path="/analysis/:id" element={<AnalysisDetail />}/>
+              <Route path="/analysis/:id/pdf" element={<ConfigPDF />} />
               <Route
                 path="/history"
                 element={

@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { RootState } from "../../../store/Store";
 import type { RequestStatus } from "../../shared/types/request";
 import type { Upload, UploadDetail } from "../Interface/UploadsInterface";
-import { fetchUploadById, fetchUploads, uploadFile } from "./UploadsThunk";
+import { fetchUploadById, fetchUploads, uploadFile ,deleteUpload} from "./UploadsThunk";
 
 interface UploadsState {
   items: Upload[]; // listado (GET /uploads)
@@ -10,6 +10,7 @@ interface UploadsState {
   listStatus: RequestStatus;
   detailStatus: RequestStatus;
   uploadStatus: RequestStatus; // subida en curso (POST /uploads)
+  deleteStatus: RequestStatus;
   error?: string;
 }
 
@@ -19,6 +20,7 @@ const initialState: UploadsState = {
   listStatus: "idle",
   detailStatus: "idle",
   uploadStatus: "idle",
+  deleteStatus: "idle",
   error: undefined,
 };
 
@@ -58,8 +60,7 @@ const uploadsSlice = createSlice({
         state.detailStatus = "rejected";
         state.error = action.payload ?? action.error.message;
       })
-      // Subida: al completar, deja el detalle creado como current y lo añade
-      // al principio del listado para que aparezca sin recargar.
+      // Subida
       .addCase(uploadFile.pending, (state) => {
         state.uploadStatus = "pending";
         state.error = undefined;
@@ -72,7 +73,24 @@ const uploadsSlice = createSlice({
       .addCase(uploadFile.rejected, (state, action) => {
         state.uploadStatus = "rejected";
         state.error = action.payload ?? action.error.message;
-      });
+      })
+      //Borrado
+      .addCase(deleteUpload.pending, (state) => {
+        state.deleteStatus = "pending";
+        state.error = undefined;
+      })
+      .addCase(deleteUpload.fulfilled, (state, action) => {
+        state.deleteStatus = "fulfilled";
+        state.items = state.items.filter((upload) => upload.id !== action.payload);
+        if (state.current?.id === action.payload) {
+          state.current = null;
+        }
+      })
+      .addCase(deleteUpload.rejected, (state, action) => {
+        state.deleteStatus = "rejected";
+        state.error = action.payload ?? action.error.message;
+      })
+
   },
 });
 
@@ -86,6 +104,8 @@ export const selectUploadsListStatus = (state: RootState) =>
   state.uploads.listStatus;
 export const selectUploadsDetailStatus = (state: RootState) =>
   state.uploads.detailStatus;
+export const selectUploadsDeleteStatus = (state: RootState) =>
+  state.uploads.deleteStatus;
 export const selectUploadsError = (state: RootState) => state.uploads.error;
 
 export default uploadsSlice.reducer;

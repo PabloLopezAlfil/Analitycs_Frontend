@@ -32,6 +32,7 @@ interface TableAnalysisProps {
   actionLabel?: string;
   onAction?: () => void;
   onViewDetail?: (id: AnalysisTableRow["id"]) => void;
+  onPdf?: (id: AnalysisTableRow["id"]) => void;
   showIncidents?: boolean;
   footerInfo?: string;
   totalLabel?: string;
@@ -79,6 +80,7 @@ export default function TableAnalysis({
   actionLabel = "Ver histórico",
   onAction,
   onViewDetail,
+  onPdf,
   showIncidents = false,
   footerInfo,
   totalLabel,
@@ -265,14 +267,29 @@ export default function TableAnalysis({
 
                           {hasDetailAction ? (
                             <td className={`${tdClass} px-5 text-right`}>
-                              <button
-                                type="button"
-                                onClick={() => onViewDetail(id)}
-                                className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-button border border-line bg-surface px-3 py-1.5 text-caption font-semibold text-muted transition-colors hover:border-line-strong hover:text-ink"
-                              >
-                                <FiEye className="h-3.5 w-3.5" aria-hidden="true" />
-                                Ver detalle
-                              </button>
+                              <div className="flex items-center justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => onViewDetail(id)}
+                                  className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-button border border-line bg-surface px-3 py-1.5 text-caption font-semibold text-muted transition-colors hover:border-line-strong hover:text-ink"
+                                >
+                                  <FiEye className="h-3.5 w-3.5" aria-hidden="true" />
+                                  Ver detalle
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={onPdf ? () => onPdf(id) : undefined}
+                                  disabled={!onPdf}
+                                  className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-button border border-line bg-surface px-3 py-1.5 text-caption font-semibold text-muted transition-colors ${
+                                    onPdf
+                                      ? "hover:border-line-strong hover:text-ink"
+                                      : "cursor-default opacity-90"
+                                  }`}
+                                >
+                                  <FiFileText className="h-3.5 w-3.5" aria-hidden="true" />
+                                  PDF
+                                </button>
+                              </div>
                             </td>
                           ) : null}
                         </tr>

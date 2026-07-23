@@ -7,6 +7,8 @@ import {
   selectAnalysisListStatus,
 } from "../Features/AnalysisSlice";
 import { fetchAnalyses } from "../Features/AnalysisThunk";
+import { selectHtmlDocumentNames } from "../../Uploads/Features/HtmlDocumentsSlice";
+import { fetchHtmlDocuments } from "../../Uploads/Features/HtmlDocumentsThunk";
 import TableAnalysis, { type AnalysisTableRow } from "../../shared/components/TableAnalysis";
 import type { Analysis as AnalysisModel } from "../Interface/AnalysisInterface";
 
@@ -37,9 +39,11 @@ export default function Analysis() {
   const analyses = useAppSelector(selectAnalyses);
   const status = useAppSelector(selectAnalysisListStatus);
   const error = useAppSelector(selectAnalysisError);
+  const documentNames = useAppSelector(selectHtmlDocumentNames);
 
   useEffect(() => {
     dispatch(fetchAnalyses());
+    dispatch(fetchHtmlDocuments());
   }, [dispatch]);
 
   const rows: AnalysisTableRow[] = [...analyses]
@@ -48,7 +52,7 @@ export default function Analysis() {
       const { label, tone } = statusForScore(score);
       return {
         id,
-        file: `Documento #${htmlId}`,
+        file: documentNames[htmlId] ?? `Documento #${htmlId}`,
         statusLabel: label,
         tone,
         score,
@@ -63,6 +67,7 @@ export default function Analysis() {
         subtitle="Histórico de análisis de accesibilidad"
         rows={rows}
         onViewDetail={(id) => navigate(`/analysis/${id}`)}
+        onPdf={(id) => navigate(`/analysis/${id}/pdf`)}
         loading={status === "idle" || status === "pending"}
         error={status === "rejected" ? error : null}
         emptyMessage="Aún no hay análisis. Lanza uno desde la sección de subidas."

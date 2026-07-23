@@ -10,9 +10,11 @@ import {
   FiLoader,
   FiZap,
 } from "react-icons/fi";
+import { IoTrashOutline } from "react-icons/io5";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { runAnalysis } from "../../Analysis/Features/AnalysisThunk";
+import DeleteModal from "../../shared/components/DeleteModal";
 import {
   selectUploads,
   selectUploadsError,
@@ -63,6 +65,10 @@ export default function Uploads() {
   const [analyzeState, setAnalyzeState] = useState<
     Record<number, AnalyzeState>
   >({});
+  const [uploadPendingDeletion, setUploadPendingDeletion] = useState<{
+    id: number;
+    originalName: string;
+  } | null>(null);
 
   useEffect(() => {
     dispatch(fetchUploads());
@@ -227,6 +233,19 @@ export default function Uploads() {
                             </button>
                           );
                         })()}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setUploadPendingDeletion({ id, originalName })
+                          }
+                          className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-button border border-line bg-line-strong  px-3 py-1.5 text-caption font-semibold  transition-colors hover:border-line-strong hover:text-ink"
+                        >
+                          <IoTrashOutline
+                            className="h-3.5 w-3.5"
+                            aria-hidden="true"
+                          />
+                          Borrar datos
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -235,6 +254,14 @@ export default function Uploads() {
           </tbody>
         </table>
       </div>
+
+      {uploadPendingDeletion ? (
+        <DeleteModal
+          id={uploadPendingDeletion.id}
+          uploadName={uploadPendingDeletion.originalName}
+          onClose={() => setUploadPendingDeletion(null)}
+        />
+      ) : null}
     </div>
   );
 }
